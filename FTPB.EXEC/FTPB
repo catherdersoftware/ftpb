@@ -2060,7 +2060,7 @@ Build_IEBCOPY:
   nn = nn + 1
   ftp.nn = "get '"whlq"."ftpjcl"' +"
   nn = nn + 1
-  ftp.nn = "    '"ftprpt_dsn"'"
+  ftp.nn = "    '"ftprpt_dsn"' (replace"
   nn = nn + 1
   ftp.nn = "site filetype=seq"
   nn = nn + 1
@@ -2305,7 +2305,7 @@ build_dump:
   nn = nn + 1
   ftp.nn = "get '"whlq"."ftpjcl"'  +"
   nn = nn + 1
-  ftp.nn = "    '"ftprpt_dsn"'"
+  ftp.nn = "    '"ftprpt_dsn"' (replace"
   nn = nn + 1
   ftp.nn = "site filetype=seq"
   nn = nn + 1
@@ -3075,16 +3075,16 @@ Setup_Remote_Jobcard:
   parse value rj1 with "//" jobname "JOB" rest
   Uuserid = translate(userid)
   if forcejbn = "Y" then do
-    jobname = Uuserid""jobsuf
+    jobname = setjob(Uuserid)
     rj1 = "//"jobname "JOB" strip(rest)
   end
   else do
     if left(jobname,length(Uuserid)) = userid then do
-      jobname = Uuserid""jobsuf
+      jobname = setjob(Uuserid)
       rj1 = "//"jobname "JOB" strip(rest)
     end
     if left(jobname,length(zuser)) = zuser then do
-      jobname = Uuserid""jobsuf
+      jobname = setjob(Uuserid)
       rj1 = "//"jobname "JOB" strip(rest)
     end
   end
@@ -3115,7 +3115,7 @@ Setup_Remote_Jobcard:
 Setup_Local_jobcard:
   parse value lj1 with "//" jobname "JOB" rest
   if left(jobname,length(zuser)) = zuser then do
-    jobname = zuser""jobsuf
+    jobname = setjob(zuser)
     lj1 = "//"jobname "JOB" strip(rest)
   end
   ftp.1 = lj1
@@ -4615,3 +4615,11 @@ Update_FTPJOBCD_Table: procedure expose null
     'tbadd ftpjobcd'
   end
   return
+
+SetJob: procedure expose null jobsuf
+parse arg ?
+$ = null
+if length(?) < 8 then $ = ?||jobsuf
+else $ = left(?, 7)jobsuf
+return $ /* SetJob */
+
