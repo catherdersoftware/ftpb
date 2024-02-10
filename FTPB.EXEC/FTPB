@@ -1,5 +1,5 @@
   /*%NOCOMMENT -------------  rexx procedure  -------------------- */
-  ftpbver = "2.033"
+  ftpbver = "2.034"
   /* Name:      FTPB                                               *
   *                                                               *
   * Function:  Generate a Batch TCP/IP FTP Job                    *
@@ -385,8 +385,16 @@
     zctact = "&FTPRFIND"
     zctdesc = "RFIND for FTP Dialog"
     "TBAdd ftpcmds"
-    "Select CMD(%"sysvar('sysicmd') options ") Newappl(FTP)" ,
-      "Passlib"
+    icmd = sysvar('sysicmd')
+    if icmd \= '' then
+      "Select CMD(%"icmd options") Newappl(FTP)" ,
+        "Passlib"
+    else do
+      parse source . . s3 . s5 .
+      icmd = "EX '"S5"("S3")' '"options"' E"
+      "Select CMD("icmd") Newappl(FTP)" ,
+        "Passlib"
+    end
     "TBEnd ftpcmds"
     Exit 0
   end
