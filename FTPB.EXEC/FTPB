@@ -1,5 +1,6 @@
   /*%NOCOMMENT -------------  rexx procedure  -------------------- */
   ftpbver = "2.034"
+  signal skipcomm           /* skip comment header for EXECUTIL TS */
   /* Name:      FTPB                                               *
   *                                                               *
   * Function:  Generate a Batch TCP/IP FTP Job                    *
@@ -355,6 +356,7 @@
   *            11/21/96-12/02/96 - creation                       *
   * ------------------------------------------------------------- */
 
+  skipcomm:
   parse arg options
 
   /* -------------------------------------- *
@@ -380,6 +382,7 @@
     Address ISPEXEC
     "TBCreate ftpcmds names(zctverb zcttrunc zctact zctdesc)",
       "replace share nowrite"
+    "TBOpen ftpcmds nowrite"
     zctverb = "RFIND"
     zcttrunc = 0
     zctact = "&FTPRFIND"
@@ -387,14 +390,14 @@
     "TBAdd ftpcmds"
     icmd = sysvar('sysicmd')
     if icmd \= '' then
-      "Select CMD(%"icmd options") Newappl(FTP)" ,
-        "Passlib"
+      icmd = "%"icmd options
     else do
       parse source . . s3 . s5 .
       icmd = "EX '"S5"("S3")' '"options"' E"
-      "Select CMD("icmd") Newappl(FTP)" ,
-        "Passlib"
     end
+    selcmd = "Select CMD("icmd") Newappl(FTP)" ,
+      "Passlib"
+    address ispexec selcmd
     "TBEnd ftpcmds"
     Exit 0
   end
@@ -517,6 +520,8 @@ Start:
     thport = save_port
     "Display Panel(ftpb)"
     if rc > 4 then do
+      say space(zerrmsg zerrsm)
+      say space(zerrlm)
       if savepwd = 1 then exit
       parse value "" with password passwvfy
       exit

@@ -20,10 +20,10 @@
 + Hostname or ? %===>@thost                                                   +
 + FTP Port      %===>@thport +  Use TLS%===>@tls+  Use Passive%===>@psv+
 +
-+User Information:
-+   Userid         %===>@userid                                                +
-+   Password       %===>`password                                              +
-+   Verify Password%===>`passwvfy                                              +
++Remote User Information:
++ Userid           %===>@userid                                                +
++ Password         %===>`password                                              +
++ Verify Password  %===>`passwvfy                                              +
 +or NETRC DSname   %===>{usernrc                                       +
 +
 +Optional Information:
@@ -60,30 +60,30 @@ ver (&tls,nb,list,Yes,No)
 ver (&psv,nb,list,Yes,No)
 &egg = trans(&ldsname egg,EGG *,*)
 if (&egg NE EGG)
-   if (&zcmd = &z)
-      ver (&ldsname,nb)
-      ver (&ftpgp,nb,list,P,G,S)
-      ver (&thost,nb)
-      if (&userid NE &Z & &usernrc NE &Z)
-          &zerrsm  = 'Conflict'
-          &zerrlm  = 'Specify only one of Userid/Password or NETRC DSName'
-          &zerralrm = 'YES'
-          &zerrhm = ' '
-         .MSG = ISRZ002
-      if (&usernrc EQ &Z)
-          ver (&userid,nb)
-      if (&usernrc NE &Z)
-         ver (&usernrc,dsnameq)
-      if (&usernrc EQ &Z)
-          if (&userid NE anonymous)
-             ver (&password,nb)
-             ver (&passwvfy,nb)
-             ver (&password,list,&passwvfy)
-      if (&fir EQ Yes)
-          ver (&firewall,nb)
-      ver (&bin,nb,list,Yes,No)
-      ver (&mvs,nb,list,Yes,No)
- &resp = .resp
+  if (&zcmd = &z)
+    ver (&ldsname,nb)
+    ver (&ftpgp,nb,list,P,G,S)
+    ver (&thost,nb)
+    if (&userid NE &Z & &usernrc NE &Z & &password NE &Z & &mvs NE Y)
+        &zerrsm  = 'Conflict'
+        &zerrlm  = 'Specify only one of Userid/Password or NETRC DSName'
+        &zerralrm = 'YES'
+        &zerrhm = ' '
+       .MSG = ISRZ002
+    if (&usernrc EQ &Z)
+        ver (&userid,nb)
+    if (&usernrc NE &Z)
+       ver (&usernrc,dsnameq)
+    if (&usernrc EQ &Z)
+        if (&userid NE anonymous)
+           ver (&password,nb)
+           ver (&passwvfy,nb)
+           ver (&password,list,&passwvfy)
+    if (&fir EQ Yes)
+        ver (&firewall,nb)
+    ver (&bin,nb,list,Yes,No)
+    ver (&mvs,nb,list,Yes,No)
+&resp = .resp
 *rexx(* zedsmsg zedlmsg csr resp ldsname rdsname)
   if resp = 'END' then exit
   parse value '' with zedsmsg zedlmsg null

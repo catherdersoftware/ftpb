@@ -1,5 +1,6 @@
-  /* -----------------------  rexx procedure  -------------------- *
-  * Name:      ftpbcust                                           *
+  /*%NOCOMMENT -------------  rexx procedure  -------------------- */
+  signal skipcomm           /* skip comment header for EXECUTIL TS */
+  /* Name:      ftpbcust                                           *
   *                                                               *
   * Function:  Setup installation defaults for the FTPB ISPF      *
   *            application.                                       *
@@ -28,6 +29,7 @@
   *                                                               *
   * ------------------------------------------------------------- */
 
+  skipcomm:
   parse value "" with null
 
   Address ISPEXEC
