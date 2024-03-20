@@ -21,9 +21,9 @@
 + FTP Port      %===>@thport +  Use TLS%===>@tls+  Use Passive%===>@psv+
 +
 +Remote User Information:
-+ Userid           %===>@userid                                                +
-+ Password         %===>`password                                              +
-+ Verify Password  %===>`passwvfy                                              +
++   Userid         %===>@userid                                                +
++   Password       %===>`password                                              +
++   Verify Password%===>`passwvfy                                              +
 +or NETRC DSname   %===>{usernrc                                       +
 +
 +Optional Information:
