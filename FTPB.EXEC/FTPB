@@ -483,14 +483,15 @@
   alloc_netrc = 0
 
 Start:
+  trace ?r
   /* -------------------------- *
   * Do Forever displaying      *
   * the FTPB Panel             *
   * -------------------------- */
   Do forever
     if alloc_netrc = 1 then do
-      if usernrc = null
-      then "Delete '"netrc_dsn"'"
+      if usernrc = null then
+        "Delete '"netrc_dsn"'"
       else "Free F(NETRC)"
       alloc_netrc = 0
     end
@@ -606,14 +607,18 @@ Do_It:
   | Fixup the user netrc data set name for JCL use |
   * ---------------------------------------------- */
   if usernrc /= null then do
-    sysdsname = null
-    x = listdsi(usernrc)
-    if pos('(',usernrc) = 0
-    then usernrcl = sysdsname
-    else do
-      parse value usernrc with .'('nrcm')'.
-      usernrcl = sysdsname'('nrcm')'
+    if pos('/', usernrc) = 0 then do
+      sysdsname = null
+      x = listdsi(usernrc)
+      if pos('(',usernrc) = 0 then
+        usernrcl = sysdsname
+      else do
+        parse value usernrc with .'('nrcm')'.
+        usernrcl = sysdsname'('nrcm')'
+      end
     end
+    else
+      usernrc = strip(usernrc, "'")
   end
 
   /* -------------------------- *
@@ -625,14 +630,14 @@ Do_It:
   /* --------------------------------------------------------- *
   * Setup HLQ and MLQ and RHLQ (remote)                       *
   * --------------------------------------------------------- */
-  if length(zprefix) = 0
-  then  hlq = zuser
-  else if zuser <> zprefix
-  then hlq = zprefix"."zuser
+  if length(zprefix) = 0 then
+    hlq = zuser
+  else if zuser <> zprefix then
+     hlq = zprefix"."zuser
   else hlq = zuser
   mlq = "FTP"
-  if netrcpre = 0
-  then netrc_hlq = hlq
+  if netrcpre = 0 then
+    netrc_hlq = hlq
   else netrc_hlq = zuser
   rhlq = translate(userid)
   whlq = rhlq
@@ -745,74 +750,74 @@ Do_It:
     * data set.                  *
     * -------------------------- */
     if pos("\",ldsnamex) = 0 then
-    if pos("/",ldsnamex) = 0 then
-    if multiple = null then do
-      /* ---- EHA ADD HFS ---- */
-      /* check if file exist   */
-      /* when it is a HFS file */
-      if substr(ldsnamex,2,1) = '/' then do
-        path = ldsnamex
-        path = STRIP(path,,"'")
-        x = syscalls('ON')      /* Z/OS REX/UNIX */
-        address syscall
-        "lstat (path) st."
-        /* lstat--pathname--stem
-        lstat invokes the lstat callable service
-        to obtain status information about a file.  */
-        x = syscalls('OFF')
-        Address ISPEXEC     /* restore environment */
-        if st.0 = 0 then do  /* 0 = notfound */
-          zedsmsg = "Local HFS Error"
-          zedlmsg = "HFS" path ,
-            "Invalid Path or file not found"
-          "Setmsg Msg(isrz001)"
-          return
-        end
-      end
-      /* ---- EHA ------------ */
-      else do
-        call listdsi ldsnamex 'dir'
-        sysreason = sysreason /* remove leading zero's */
-        if sysreason = 3 then do
-          zdstota = 0; zds2ex = 0
-          parse value null with zdsspc zdsdsnt zdsorg
-          Address ISPExec "DSInfo Dataset("ldsnamex")"
-          sysalloc   = strip(zdstota)
-          sysseconds = strip(zds2ex)
-          sp         = translate(left(strip(zdsspc),2))
-          select
-            when sp = "BL" then spx = "BLK"
-            when sp = "TR" then spx = "TRK"
-            when sp = "CY" then spx = "CYL"
-            otherwise spx = sp
+      if pos("/",ldsnamex) = 0 then
+        if multiple = null then do
+          /* ---- EHA ADD HFS ---- */
+          /* check if file exist   */
+          /* when it is a HFS file */
+          if substr(ldsnamex,2,1) = '/' then do /* TODO this is never true */
+            path = ldsnamex
+            path = STRIP(path,,"'")
+            x = syscalls('ON')      /* Z/OS REX/UNIX */
+            address syscall
+            "lstat (path) st."
+            /* lstat--pathname--stem
+            lstat invokes the lstat callable service
+            to obtain status information about a file.  */
+            x = syscalls('OFF')
+            Address ISPEXEC     /* restore environment */
+            if st.0 = 0 then do  /* 0 = notfound */
+              zedsmsg = "Local HFS Error"
+              zedlmsg = "HFS" path ,
+                "Invalid Path or file not found"
+              "Setmsg Msg(isrz001)"
+              return
+            end
           end
-          if strip(zdsdsnt) = "HFS"
-          then sysdsorg  = strip(zdsdsnt)
-          else sysdsorg  = strip(zdsorg)
-          sysadirblk = 0
-        end
-        if sysreason = 8 then do
-          sysdsorg = "PS"
-          tape_fl  = 1
-        end
-        if sysreason = 5 then do
-          zedsmsg = "From DSN Error"
-          zedlmsg = "DSN" ldsname ,
-            "Invalid dsname or dsname not found"
-          "Setmsg Msg(isrz001)"
-          return
-        end
-        if length(members) > 0 then do
-          dsn_stat = sysdsn(ldsnamex)
-          if dsn_stat <> "OK" then do
-            zedsmsg = "From DSN Error"
-            zedlmsg = "DSN:" ldsname dsn_stat
-            "Setmsg msg(isrz001)"
-            return
+          /* ---- EHA ------------ */
+          else do
+            call listdsi ldsnamex 'dir'
+            sysreason = sysreason /* remove leading zero's */
+            if sysreason = 3 then do
+              zdstota = 0; zds2ex = 0
+              parse value null with zdsspc zdsdsnt zdsorg
+              Address ISPExec "DSInfo Dataset("ldsnamex")"
+              sysalloc   = strip(zdstota)
+              sysseconds = strip(zds2ex)
+              sp         = translate(left(strip(zdsspc),2))
+              select
+                when sp = "BL" then spx = "BLK"
+                when sp = "TR" then spx = "TRK"
+                when sp = "CY" then spx = "CYL"
+                otherwise spx = sp
+              end
+              if strip(zdsdsnt) = "HFS"
+              then sysdsorg  = strip(zdsdsnt)
+              else sysdsorg  = strip(zdsorg)
+              sysadirblk = 0
+            end
+            if sysreason = 8 then do
+              sysdsorg = "PS"
+              tape_fl  = 1
+            end
+            if sysreason = 5 then do
+              zedsmsg = "From DSN Error"
+              zedlmsg = "DSN" ldsname ,
+                "Invalid dsname or dsname not found"
+              "Setmsg Msg(isrz001)"
+              return
+            end
+            if length(members) > 0 then do
+              dsn_stat = sysdsn(ldsnamex)
+              if dsn_stat <> "OK" then do
+                zedsmsg = "From DSN Error"
+                zedlmsg = "DSN:" ldsname dsn_stat
+                "Setmsg msg(isrz001)"
+                return
+              end
+            end
           end
         end
-      end
-    end
   end
 
   /* -------------------------- *
@@ -1707,7 +1712,26 @@ Set_FTP:
     end
     else do
       nn = nn + 1
-      ftp.nn = "//NETRC     DD  DISP=SHR,DSN="usernrcl
+      if pos('/', usernrc) = 0 then
+        ftp.nn = "//NETRC     DD  DISP=SHR,DSN="usernrcl
+      else do
+        x = "//NETRC     DD  PATH='"
+        charleft = (70 - length(x))
+        if length(usernrc) <= charleft then
+          ftp.nn = x||usernrc||"'"
+        else do
+          x = overlay("+", x||left(usernrc, charleft), 72)
+          ftp.nn = x
+          p = 57
+          do p = (charleft + 1) by 56 while charleft > 56
+            nn = nn + 1
+            ftp.nn = "//             "||substr(usernrc, p, 56)"+"
+            charleft = charleft - 56
+          end p
+          nn = nn + 1
+          ftp.nn = "//             "||substr(usernrc, p)"'"
+        end
+      end
     end
     netrc_dd = nn
 
@@ -2413,7 +2437,7 @@ Do_Pattern:
         "Csrrow("rowcrp") AutoSel(No)"
     end
     else
-    "TBDispl" tblname
+      "TBDispl" tblname
     t_rc = rc
     mult_sels = ztdsels
     if t_rc > 7 then leave
@@ -2716,8 +2740,8 @@ Fix_FTP:
   * ------------------------------------------------------------- */
   targhost = thost
   targport = thport
-  if tls = 'Yes'
-  then tlso = '-a tls'
+  if tls = 'Yes' then
+    tlso = '-a tls'
   else tlso = null
   targtls  = tls
   call get_jobid
@@ -2807,8 +2831,8 @@ Do_FTP:
   tt = time('n')
   tt = left(tt,2)substr(tt,4,2)
   jsuf = ".FTPBJCL.D"date('j')".T"tt".PDS'"
-  if sysvar('syspref') = null
-  then pdsdsn = "'"sysvar('sysuid')''jsuf
+  if sysvar('syspref') = null then
+    pdsdsn = "'"sysvar('sysuid')''jsuf
   else pdsdsn = "'"sysvar('syspref')''jsuf
   do forever
     if unl = "No" then
@@ -2823,7 +2847,13 @@ Do_FTP:
         Address TSO "Free F("ddn")"
         if netrc = 1 then do
           if usernrc = null then
-          Address TSO "Delete '"netrc_dsn"'"
+            if pos('/', netrc_dsn) = 0 then
+              Address TSO "Delete '"netrc_dsn"'"
+            else do
+              x = syscalls('ON')
+              address syscall "unlink" netrc_Dsn
+              x = syscalls('OFF')
+            end
           else Address TSO 'free f(netrc)'
         end
         call clean_up_submit
@@ -2987,8 +3017,8 @@ Do_FTP:
           "Control Display Lock"
           "Display Panel(ftpbexec)"
 
-          if tls = 'Yes'
-          then tlso = '-a tls '
+          if tls = 'Yes' then
+            tlso = '-a tls '
           else tlso = ''
           if thport = null then thport = 21
           'Select PGM(FTP) PARM('tlso''thost thport')'
@@ -2999,7 +3029,13 @@ Do_FTP:
           if netrc = 1 then do
             "Free f(netrc)"
             if usernrc = null then
-            "Delete '"netrc_dsn"'"
+              if pos('/', netrc_dsn) = 0 then
+                "Delete '"netrc_dsn"'"
+              else do
+                x = syscalls('ON')
+                address syscall "unlink" netrc_dsn
+                x = syscalls('OFF')
+              end
           end
           Address ISPExec
           "Lminit Dataid(outid) DDName(Output)"
@@ -3051,8 +3087,14 @@ Clean_Up_Submit:
     Address TSO
     "Delete '"hlq"."loadjcl_dsn"'"  /* eha 08 jul 2008 */
     if alloc_netrc = 1 then do
-      if usernrc = null
-      then "Delete '"netrc_dsn"'"
+      if usernrc = null then
+        if pos('/', netrc_dsn) = 0 then
+          "Delete '"netrc_dsn"'"
+        else do
+          x = syscalls('ON')
+          address syscall "unlink" netrc_dsn
+          x = syscalls('OFF')
+        end
       else "Free F(netrc)"
       alloc_netrc = 0
     end
@@ -3086,8 +3128,8 @@ Setup_Remote_Jobcard:
     rj4 = ftp.4
   end
   if userid = null then
-  if usernrc /= null
-  then userid = get_nrc_uid()
+  if usernrc /= null then
+    userid = get_nrc_uid()
   if userid = 0 then userid = sysvar('sysuid')
   parse value rj1 with "//" jobname "JOB" rest
   Uuserid = translate(userid)
@@ -3208,8 +3250,8 @@ Get_Hostname:
     "TBDispl thosttbl"
     xrc = rc
     mult_sels = ztdsels
-    if ztdsels = 0
-    then if words(mhst) > 0 then xrc = 8
+    if ztdsels = 0 then
+      if words(mhst) > 0 then xrc = 8
     if xrc > 7 then do
       call save_thost_table
       if words(mhst) > 0 then return
@@ -3217,9 +3259,10 @@ Get_Hostname:
     end
     Select
       when abbrev("SORT",word(zcmd,1),1) = 1 then do
-        if left(word(zcmd,2),1) = 'A'
-        then "TBSort thosttbl Fields(targhost,C,A)"
-        else "TBSort thosttbl Fields(targhost,C,D)"
+        if left(word(zcmd,2),1) = 'A' then
+          "TBSort thosttbl Fields(targhost,C,A)"
+        else
+          "TBSort thosttbl Fields(targhost,C,D)"
         xrc = 0
         targhost = "?"
       end
@@ -3230,9 +3273,12 @@ Get_Hostname:
       end
       when zcmd = "NETRC" then do
         if usernrc /= null then do
-          if sysvar('syspref') = null
-          then usernrc = 'NETRC'
-          else usernrc = "'"sysvar('sysuid')".NETRC'"
+          if sysvar('syspref') = null then
+            usernrc = 'NETRC'
+          else do
+            usernrc = "'"sysvar('syspref')".NETRC'"
+            if sysdsn(usernrc) \== "OK" then
+              usernrc = "'"sysvar('sysuid')".NETRC'"
         end
         'vput (usernrc) profile'
         x = ftpbnrc(usernrc)
@@ -3324,7 +3370,10 @@ Get_Hostname:
 Get_NRC_Uid:
   Address TSO
   nrcdd = 'NRC'random(9999)
-  'Alloc f('nrcdd') shr reuse ds('usernrc')'
+  if pos('/', usernrc) = 0 then
+    'Alloc f('nrcdd') shr reuse ds('usernrc')'
+  else
+    'alloc f('nrcdd') path('usernrc')'
   'Execio * diskr' nrcdd '(finis stem nrc.'
   'Free f('nrcdd')'
   Address ISPExec
@@ -3443,8 +3492,11 @@ Alloc_Netrc:
     drop netrc.
     call set_netsec
   end
+  else do
+  if pos('/', netrc) = 0 then
+    Address TSO "Alloc f(netrc) shr reuse ds('"usernrcl"')"
   else
-  Address TSO "Alloc f(netrc) shr reuse ds('"usernrcl"')"
+    Address TSO "Alloc f(netrc) path("usernrc")"
   return
 
   /* ---------------------------------------------------------- *
@@ -3689,8 +3741,11 @@ Check_Remote:
   * ------------------------------ */
 Do_FTPx:
   Address TSO
-  if usernrc /= null
-  then  'Alloc f(netrc) ds('usernrc') shr reuse'
+  if usernrc /= null then
+     if pos('/', usernrc) = 0 then
+       'Alloc f(netrc) ds('usernrc') shr reuse'
+     else
+       'Alloc f(netrc) path('usernrc')  reuse'
   else do
     'alloc f(netrc) recfm(v b) lrecl(255) blksize(0) spa(1,1) tr reuse'
     netrc.1 = "MACHINE" thost "LOGIN" userid "PASSWORD" password
@@ -4335,8 +4390,8 @@ Proc_Member_List:
         'control display restore'
       end
       when fsel = 'C' then do
-        if sysvar('syspref') = null
-        then pref = sysvar('sysuid')
+        if sysvar('syspref') = null then
+          pref = sysvar('sysuid')
         else pref = sysvar('syspref')
         tempds = "'"pref".zftpget.r"random(9999)".data'"
         tempdd = 'FT'time('s')

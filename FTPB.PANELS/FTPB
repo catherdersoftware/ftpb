@@ -18,23 +18,23 @@
 +
 +Remote Information:            Direction%===>_z+ %G+Get,%P+Put+or%S+Sync
 + Hostname or ? %===>@thost                                                   +
-+ FTP Port      %===>@thport +  Use TLS%===>@tls+  Use Passive%===>@psv+
++ FTP Port      %===>@z    +    Use TLS%===>@tls+  Use Passive%===>@psv+
 +
 +Remote User Information:
-+ Userid/TSO Prefix%===>@userid                                                +
++ Userid/TSO Prefix%===>@userid                                             #s3+
 + Password         %===>`password                                              +
 + Verify Password  %===>`passwvfy                                              +
-+or NETRC DSname   %===>{usernrc                                       +
++or NETRC DSN/File %===>{usernrc                                            #s4+
 +
 +Optional Information:
 +  z/OS Remote%===>@mvs+%Yes+or%No+Is the Remote system running z/OS?
 +  Delta Only %===>@syd+%Yes+or%No+to limit Sync display to Delta Only?
 +   Binary    %===>@bin+%Yes+or%No+(use%No+for z/OS to z/OS)
 +   Firewall  %===>@fir+ Address if Yes ===>@firewall                          +
-+   Initial   %===>$other                                                      +
-+  Post cmd   %===>$post                                                       +
++   Initial   %===>$other                                                   #s5+
++  Post cmd   %===>$post                                                    #s6+
 )INIT
- .zvars = '(ftpgp)'
+ .zvars = '(ftpgp thport)'
  .help = ftpbh0
  IF (&ldsname = &Z)
     .cursor = ldsname
@@ -148,6 +148,12 @@ if (&egg NE EGG)
 )Field
  Field(ldsname)  IND(s1) LEN(256)
  Field(rdsname)  IND(s2) LEN(256)
+ Field(userid)   IND(s3) LEN(256)
+ Field(usernrc)  IND(s4) LEN(256)
+ Field(other)    IND(s5) LEN(256)
+ Field(post)     IND(s6) LEN(256)
 )END
 /* 2024-01-03  MRM  2.032 Variables sdsname->ldsname, tdsname->rdsname        */
 /*                        From/To nomenclature changed to Local/Remote        */
+/* 2024-03-24  MRM  2.034 Update prompt text, allow more fields to be         */
+/*                        expanded                                            */

@@ -4,9 +4,9 @@
 ~ type(text) intens(high) caps(off) just(asis ) color(turq)
 % type(text) intens(high)
 # type(text) intens(high) color(turq) hilite(reverse)
-)BODY WINDOW(64,13)
+)BODY WINDOW(64,16)
 %Command ===>_ZCMD
-`Userid+
+`Userid/TSO Prefix+
 +
 ~This input field defines the#userid~to be used at the remote
 ~system.  It may not be the same as the userid in use at
@@ -16,6 +16,9 @@
 ~not validated.
 ~
 ~The Userid is still required if a user#NETRC~data set is used.
+~In that case, it is used as the#TSO PREFIX~value for the remote
+~session. If you need a TSO prefix that does not match the
+~remote userid, you must use an NETRC file.
 )INIT
  &zwinttl = 'FTP Userid'
  &zcont = ftpbhf5
