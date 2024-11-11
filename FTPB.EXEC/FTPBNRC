@@ -19,6 +19,7 @@
  | Author:    Lionel B. Dyck                                  |
  |                                                            |
  | History:  (most recent on top)                             |
+ |            03/21/24 MRM - Support z/OS file system         |
  |            01/22/21 LBD - Rename ISPF resources            |
  |            01/12/21 LBD - Add EDIT option                  |
  |            01/06/21 LBD - Refinement                       |
@@ -58,7 +59,10 @@ Restart:
   end
   else do
     Address TSO
-    'Alloc f('work_dd') ds('usernrc') shr reuse'
+    if pos('/', usernrc) > 0 then
+      'Alloc f('work_dd') path('usernrc') pathdisp(keep) reuse'
+    else
+      'Alloc f('work_dd') ds('usernrc') shr reuse'
     'Execio * diskr' work_dd '(finis stem netrc.'
     Address ISPExec
   end

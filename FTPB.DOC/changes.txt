@@ -1,6 +1,8 @@
 This member (new with the 1.195 level) documents the changes from
 prior levels.
 
+01/16/2024  - 2.033  - Fix overzealous refactor
+
 01/03/2024  - 2.032  - Finish nomenclanture update (from->local,
                        to->remote, sdsname->ldsname, tdsname->rdsname)
                      - Correct data set processed in Do_Get
