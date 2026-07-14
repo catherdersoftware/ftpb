@@ -61,6 +61,8 @@
   * Requirements:                                                 *
   *                                                               *
   * History:                                                      *
+  *            03/01/2024  - 2.034  - Issue 10 fixes:             *
+  *                                 - PUT reading entire catalog  *
   *            01/16/2024  - 2.033  - Fix overzealous refactor    *
   *            01/03/2024  - 2.032  - Finish nomenclanture update *
   *                                   (from->local, to->remote,   *
